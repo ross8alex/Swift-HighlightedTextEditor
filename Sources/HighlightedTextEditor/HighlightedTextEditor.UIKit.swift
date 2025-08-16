@@ -67,22 +67,29 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
-        if let selectedTextRange = context.coordinator.selectedTextRange {
-            // Dispatch the selection update to the main queue
-            DispatchQueue.main.async {
-                // Recalculate offsets in case the text changed
-                let textLength = uiView.text.utf16.count
-                let startOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedTextRange.start)
-                let endOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedTextRange.end)
+        // Assuming 'storedStartOffset' and 'storedEndOffset' are the integer offsets you saved
+        if let storedStartOffset = context.coordinator.storedStartOffset,
+           let storedEndOffset = context.coordinator.storedEndOffset {
         
-                // Validate the offsets again before applying
-                if startOffset >= 0 && endOffset <= textLength {
-                    uiView.selectedTextRange = selectedTextRange
+            // Use DispatchQueue.main.async to allow the system to stabilize
+            DispatchQueue.main.async {
+                // Get the current text length for validation
+                let textLength = uiView.text.utf16.count
+        
+                // Validate the offsets against the current text length
+                if storedStartOffset >= 0 && storedEndOffset <= textLength {
+                    // Find the new UITextPosition objects based on the current text view state
+                    if let startPosition = uiView.position(from: uiView.beginningOfDocument, offset: storedStartOffset),
+                       let endPosition = uiView.position(from: uiView.beginningOfDocument, offset: storedEndOffset) {
+        
+                        // Create a new, valid UITextRange
+                        if let newRange = uiView.textRange(from: startPosition, to: endPosition) {
+                            uiView.selectedTextRange = newRange
+                        }
+                    }
                 } else {
-                    // Handle the case where the range is still invalid.
-                    // This can happen if predictive text completely changed the text,
-                    // or a suggestion was accepted.
-                    print("Invalid selectedTextRange after predictive text update, cannot restore selection.")
+                    // The stored offsets are no longer valid.
+                    print("Stored offsets are invalid. Moving cursor to end of text.")
                     if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
                         uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
                     }
