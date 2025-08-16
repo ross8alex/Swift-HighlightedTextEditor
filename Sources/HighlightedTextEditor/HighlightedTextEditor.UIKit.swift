@@ -67,10 +67,27 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
-        do {
-        uiView.selectedTextRange = context.coordinator.selectedTextRange
-        } catch {
+        if let selectedTextRange = context.coordinator.selectedTextRange,
+           let text = uiView.text,
+           selectedTextRange.start < text.endIndex,
+           selectedTextRange.end <= text.endIndex {
             
+            // Convert Swift String.Index to UITextInput's text position
+            if let startPosition = uiView.position(from: uiView.beginningOfDocument, offset: text.distance(from: text.startIndex, to: selectedTextRange.start)),
+               let endPosition = uiView.position(from: uiView.beginningOfDocument, offset: text.distance(from: text.startIndex, to: selectedTextRange.end)) {
+        
+                // Check again to be safe
+                if let newSelectedRange = uiView.textRange(from: startPosition, to: endPosition) {
+                    uiView.selectedTextRange = newSelectedRange
+                }
+            }
+        } else {
+            // Handle the case where the range is invalid.
+            // This could be a print statement for debugging, or you could set the cursor to the end of the text.
+            print("Invalid selectedTextRange, cannot restore selection.")
+            if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
+                uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
+            }
         }
         context.coordinator.updatingUIView = false
     }
