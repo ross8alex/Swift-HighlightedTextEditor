@@ -15,8 +15,8 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         public let scrollView: SystemScrollView?
     }
 
-    var storedStartOffset: Int?
-    var storedEndOffset: Int?
+    var storedStartOffset: Int = 0
+    var storedEndOffset: Int = 0
 
     @Binding var text: String {
         didSet {
