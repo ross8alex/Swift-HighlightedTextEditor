@@ -67,6 +67,16 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
+        // Assuming 'uiView.selectedTextRange' is the current selection
+        if let selectedRange = uiView.selectedTextRange {
+            let startOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedRange.start)
+            let endOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedRange.end)
+        
+            // Store these integer offsets instead of the UITextRange itself
+            context.coordinator.storedStartOffset = startOffset
+            context.coordinator.storedEndOffset = endOffset
+        }
+        
         // Assuming 'storedStartOffset' and 'storedEndOffset' are the integer offsets you saved
         if let storedStartOffset = context.coordinator.storedStartOffset,
            let storedEndOffset = context.coordinator.storedEndOffset {
