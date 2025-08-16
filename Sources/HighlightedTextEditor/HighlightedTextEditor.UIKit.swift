@@ -9,7 +9,7 @@
 import SwiftUI
 import UIKit
 
-public class HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor {
+public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor {
     public struct Internals {
         public let textView: SystemTextView
         public let scrollView: SystemScrollView?
@@ -56,52 +56,26 @@ public class HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor 
     }
 
     public func updateUIView(_ uiView: UITextView, context: Context) {
-        uiView.isScrollEnabled = false
-        context.coordinator.updatingUIView = true
-
-        let highlightedText = HighlightedTextEditor.getHighlightedText(
-            text: text,
-            highlightRules: highlightRules
-        )
-
-        if let range = uiView.markedTextNSRange {
-            uiView.setAttributedMarkedText(highlightedText, selectedRange: range)
-        } else {
-            uiView.attributedText = highlightedText
-        }
-        updateTextViewModifiers(uiView)
-        runIntrospect(uiView)
-        uiView.isScrollEnabled = true
-        // Assuming 'storedStartOffset' and 'storedEndOffset' are the integer offsets you saved
-        if let startOffset = storedStartOffset,
-           let endOffset = storedEndOffset {
-        
-            // Use DispatchQueue.main.async to allow the system to stabilize
-            DispatchQueue.main.async {
-                // Get the current text length for validation
-                let textLength = uiView.text.utf16.count
-        
-                // Validate the offsets against the current text length
-                if storedStartOffset >= 0 && storedEndOffset <= textLength {
-                    // Find the new UITextPosition objects based on the current text view state
-                    if let startPosition = uiView.position(from: uiView.beginningOfDocument, offset: storedStartOffset),
-                       let endPosition = uiView.position(from: uiView.beginningOfDocument, offset: storedEndOffset) {
-        
-                        // Create a new, valid UITextRange
-                        if let newRange = uiView.textRange(from: startPosition, to: endPosition) {
-                            uiView.selectedTextRange = newRange
-                        }
-                    }
-                } else {
-                    // The stored offsets are no longer valid.
-                    print("Stored offsets are invalid. Moving cursor to end of text.")
-                    if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
-                        uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
-                    }
-                }
+        DispatchQueue.main.async { 
+            uiView.isScrollEnabled = false
+            context.coordinator.updatingUIView = true
+    
+            let highlightedText = HighlightedTextEditor.getHighlightedText(
+                text: text,
+                highlightRules: highlightRules
+            )
+    
+            if let range = uiView.markedTextNSRange {
+                uiView.setAttributedMarkedText(highlightedText, selectedRange: range)
+            } else {
+                uiView.attributedText = highlightedText
             }
+            updateTextViewModifiers(uiView)
+            runIntrospect(uiView)
+            uiView.isScrollEnabled = true
+            uiView.selectedTextRange = context.coordinator.selectedTextRange
+            context.coordinator.updatingUIView = false
         }
-        context.coordinator.updatingUIView = false
     }
 
     private func runIntrospect(_ textView: UITextView) {
