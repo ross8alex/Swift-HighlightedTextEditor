@@ -51,7 +51,7 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
     }
 
     public func updateUIView(_ uiView: UITextView, context: Context) {
-        DispatchQueue.main.async { 
+        //DispatchQueue.main.async { 
             uiView.isScrollEnabled = false
             context.coordinator.updatingUIView = true
     
@@ -70,7 +70,7 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
             uiView.isScrollEnabled = true
             uiView.selectedTextRange = context.coordinator.selectedTextRange
             context.coordinator.updatingUIView = false
-        }
+        //}
     }
 
     private func runIntrospect(_ textView: UITextView) {
