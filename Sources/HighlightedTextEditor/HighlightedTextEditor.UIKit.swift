@@ -9,7 +9,7 @@
 import SwiftUI
 import UIKit
 
-public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor {
+public class HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor {
     public struct Internals {
         public let textView: SystemTextView
         public let scrollView: SystemScrollView?
