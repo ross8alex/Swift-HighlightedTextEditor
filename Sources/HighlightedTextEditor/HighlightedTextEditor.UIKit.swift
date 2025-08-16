@@ -21,8 +21,8 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
     @Binding var text: String {
         didSet {
             onTextChange?(text)
-            storedStartOffset = text.count
-            storedEndOffset = text.count
+            self.storedStartOffset = text.count
+            self.storedEndOffset = text.count
         }
     }
 
