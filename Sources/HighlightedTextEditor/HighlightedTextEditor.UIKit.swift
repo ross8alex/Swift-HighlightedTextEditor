@@ -67,7 +67,11 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
+        do {
         uiView.selectedTextRange = context.coordinator.selectedTextRange
+        } catch {
+            
+        }
         context.coordinator.updatingUIView = false
     }
 
