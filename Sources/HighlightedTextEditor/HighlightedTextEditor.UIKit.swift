@@ -67,26 +67,27 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         updateTextViewModifiers(uiView)
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
-        if let selectedTextRange = context.coordinator.selectedTextRange,
-           let text = uiView.text,
-           selectedTextRange.start < text.endIndex,
-           selectedTextRange.end <= text.endIndex {
+        if let selectedTextRange = context.coordinator.selectedTextRange {
+            // Get the length of the text in the UITextView
+            let textLength = uiView.text.utf16.count
+
+            let start = selectedTextRange?.start
+            let end = selectedTextRange?.end
             
-            // Convert Swift String.Index to UITextInput's text position
-            if let startPosition = uiView.position(from: uiView.beginningOfDocument, offset: text.distance(from: text.startIndex, to: selectedTextRange.start)),
-               let endPosition = uiView.position(from: uiView.beginningOfDocument, offset: text.distance(from: text.startIndex, to: selectedTextRange.end)) {
+            // Calculate the distance from the beginning of the document to the start and end of the selected range.
+            let startOffset = uiView.offset(from: uiView.beginningOfDocument, to: start!)
+            let endOffset = uiView.offset(from: uiView.beginningOfDocument, to: end!)
         
-                // Check again to be safe
-                if let newSelectedRange = uiView.textRange(from: startPosition, to: endPosition) {
-                    uiView.selectedTextRange = newSelectedRange
-                }
-            }
-        } else {
-            // Handle the case where the range is invalid.
-            // This could be a print statement for debugging, or you could set the cursor to the end of the text.
-            print("Invalid selectedTextRange, cannot restore selection.")
-            if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
-                uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
+            // Validate that the offsets are within the bounds of the text.
+            if startOffset >= 0 && endOffset <= textLength {
+                // The range is valid, so you can apply it.
+                uiView.selectedTextRange = selectedTextRange
+            } else {
+                // The range is invalid or out of bounds. Handle this by setting the cursor to the end of the text.
+                print("Invalid selectedTextRange, cannot restore selection.")
+                // if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
+                //     uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
+                // }
             }
         }
         context.coordinator.updatingUIView = false
