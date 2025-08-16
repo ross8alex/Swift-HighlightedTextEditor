@@ -68,24 +68,24 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
         if let selectedTextRange = context.coordinator.selectedTextRange {
+            // Dispatch the selection update to the main queue
             DispatchQueue.main.async {
-                // Get the length of the text in the UITextView
+                // Recalculate offsets in case the text changed
                 let textLength = uiView.text.utf16.count
-    
-                // Calculate the distance from the beginning of the document to the start and end of the selected range.
                 let startOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedTextRange.start)
                 let endOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedTextRange.end)
-            
-                // Validate that the offsets are within the bounds of the text.
+        
+                // Validate the offsets again before applying
                 if startOffset >= 0 && endOffset <= textLength {
-                    // The range is valid, so you can apply it.
                     uiView.selectedTextRange = selectedTextRange
                 } else {
-                    // The range is invalid or out of bounds. Handle this by setting the cursor to the end of the text.
-                    print("Invalid selectedTextRange, cannot restore selection.")
-                    // if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
-                    //     uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
-                    // }
+                    // Handle the case where the range is still invalid.
+                    // This can happen if predictive text completely changed the text,
+                    // or a suggestion was accepted.
+                    print("Invalid selectedTextRange after predictive text update, cannot restore selection.")
+                    if let newPosition = uiView.position(from: uiView.endOfDocument, offset: 0) {
+                        uiView.selectedTextRange = uiView.textRange(from: newPosition, to: newPosition)
+                    }
                 }
             }
         }
