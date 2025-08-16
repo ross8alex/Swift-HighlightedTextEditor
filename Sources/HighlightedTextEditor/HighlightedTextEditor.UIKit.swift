@@ -14,15 +14,10 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         public let textView: SystemTextView
         public let scrollView: SystemScrollView?
     }
-
-    var storedStartOffset: Int = 0
-    var storedEndOffset: Int = 0
-
+    
     @Binding var text: String {
         didSet {
             onTextChange?(text)
-            storedStartOffset = text.count
-            storedEndOffset = text.count
         }
     }
 
