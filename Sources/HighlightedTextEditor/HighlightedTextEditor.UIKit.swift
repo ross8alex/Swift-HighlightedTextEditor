@@ -71,12 +71,9 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
             // Get the length of the text in the UITextView
             let textLength = uiView.text.utf16.count
 
-            let start = selectedTextRange?.start
-            let end = selectedTextRange?.end
-            
             // Calculate the distance from the beginning of the document to the start and end of the selected range.
-            let startOffset = uiView.offset(from: uiView.beginningOfDocument, to: start!)
-            let endOffset = uiView.offset(from: uiView.beginningOfDocument, to: end!)
+            let startOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedTextRange.start)
+            let endOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedTextRange.end)
         
             // Validate that the offsets are within the bounds of the text.
             if startOffset >= 0 && endOffset <= textLength {
