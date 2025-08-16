@@ -15,9 +15,14 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         public let scrollView: SystemScrollView?
     }
 
+    var storedStartOffset: Int?
+    var storedEndOffset: Int?
+
     @Binding var text: String {
         didSet {
             onTextChange?(text)
+            storedStartOffset = text.count
+            storedEndOffset = text.count
         }
     }
 
@@ -68,9 +73,8 @@ public struct HighlightedTextEditor: UIViewRepresentable, HighlightingTextEditor
         runIntrospect(uiView)
         uiView.isScrollEnabled = true
         // Assuming 'storedStartOffset' and 'storedEndOffset' are the integer offsets you saved
-        if let selectedRange = uiView.selectedTextRange {
-            let storedStartOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedRange.start)
-            let storedEndOffset = uiView.offset(from: uiView.beginningOfDocument, to: selectedRange.end)
+        if let startOffset = storedStartOffset,
+           let endOffset = storedEndOffset {
         
             // Use DispatchQueue.main.async to allow the system to stabilize
             DispatchQueue.main.async {
